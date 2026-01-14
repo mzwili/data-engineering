@@ -44,3 +44,22 @@ logs/
 # Temporary
 *.tmp
 .cache/
+uv.lock
+
+# Packaging & tooling
+.python-version
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+dist/
+build/
+*.egg-info/
+pip-wheel-metadata/
+.mypy_cache/
+.ropeproject/
+.pyre/
+
+# Local editor/workspace
+.vscode/settings.json
