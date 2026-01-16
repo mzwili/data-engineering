@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[15]:
-
-
+from sys import prefix
 import pandas as pd
+from sqlalchemy import create_engine
+from tqdm.auto import tqdm
+import click
 
-
-# In[35]:
-
-
+# Define data types for each column
 dtype = {
     "VendorID": "Int64",
     "passenger_count": "Int64",
@@ -29,108 +27,65 @@ dtype = {
     "congestion_surcharge": "float64"
 }
 
-
-# In[36]:
-
-
+# Define which columns should be parsed as dates
 parse_dates = [
     "tpep_pickup_datetime",
     "tpep_dropoff_datetime"
 ]
 
-
-# In[51]:
-
-
-prefix = 'https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/'
-df = pd.read_csv(
-    prefix + 'yellow_tripdata_2021-01.csv.gz',
-    nrows=100,
-    dtype=dtype,
-    parse_dates=parse_dates
-)
-
-
-# In[52]:
+@click.command()
+@click.option('--pg_user', default='root', help='PostgreSQL user')
+@click.option('--pg_password', default='root', help='PostgreSQL password')
+@click.option('--pg_host', default='localhost', help='PostgreSQL host')
+@click.option('--pg_port', default=5432, type=int, help='PostgreSQL port')
+@click.option('--pg_db', default='ny_taxi', help='PostgreSQL database name')
+@click.option('--table_name', default='yellow_taxi_data', help='Target table name')
+@click.option('--chunk_size', default=100000, type=int, help='Chunk size for data ingestion')
+@click.option('--year', default=2021, type=int, help='Year of data to ingest')
+@click.option('--month', default=1, type=int, help='Month of data to ingest')
 
 
-df.head()
 
 
-# In[53]:
 
 
-uv add sqlalchemy psycopg2-binary
+def run(pg_user, pg_password, pg_host, pg_port, pg_db, table_name, chunk_size, year, month):
 
+    engine = create_engine(f'postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_db}')
+    prefix = 'https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/'
+    url = f'{prefix}/yellow_tripdata_{year}-{month:02d}.csv.gz'
 
-# In[54]:
-
-
-from sqlalchemy import create_engine
-engine = create_engine('postgresql://root:root@localhost:5432/ny_taxi')
-
-
-# In[56]:
-
-
-df.head(n=0).to_sql(name='yellow_taxi_data', con=engine, if_exists='replace')
-
-
-# In[55]:
-
-
-print(pd.io.sql.get_schema(df, name='yellow_taxi_data', con=engine))
-
-
-# In[66]:
-
-
-df_iter = pd.read_csv(
-    prefix + 'yellow_tripdata_2021-01.csv.gz',
-    dtype=dtype,
-    parse_dates=parse_dates,
-    iterator=True,
-    chunksize=100000
-)
-
-
-# In[62]:
-
-
-uv add tqdm
-
-
-# In[67]:
-
-
-from tqdm.auto import tqdm
-
-first = True
-
-for df_chunk in tqdm(df_iter):
-
-    if first:
-        # Create table schema (no data)
-        df_chunk.head(0).to_sql(
-            name="taxi_data",
-            con=engine,
-            if_exists="replace"
-        )
-        first = False
-        print("Table created")
-
-    # Insert chunk
-    df_chunk.to_sql(
-        name="taxi_data",
-        con=engine,
-        if_exists="append"
+    df_iter = pd.read_csv(
+        url,
+        dtype=dtype,
+        parse_dates=parse_dates,
+        iterator=True,
+        chunksize=chunk_size
     )
 
-    print("Inserted:", len(df_chunk))
+    first = True
 
+    for df_chunk in tqdm(df_iter):
 
-# In[ ]:
+        if first:
+            # Create table schema (no data)
+            df_chunk.head(0).to_sql(
+                name=table_name,
+                con=engine,
+                if_exists="replace"
+            )
+            first = False
+            print("Table created")
 
+        # Insert chunk
+        df_chunk.to_sql(
+            name=table_name,
+            con=engine,
+            if_exists="append"
+        )
 
+        print("Inserted:", len(df_chunk))
 
+if __name__ == "__main__":
+    run()
 
