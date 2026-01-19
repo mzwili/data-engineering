@@ -31,6 +31,24 @@ python pipeline.py 1
 uv run python pipeline.py 10
 ```
 
+4. Run the data ingestion script (requires PostgreSQL running):
+
+```bash
+cd virtual-environment
+uv run python ingest_data.py \
+  --pg_user=my_db_usr \
+  --pg_password=my_db_pass \
+  --pg_host=localhost \
+  --pg_port=my_port_number \
+  --pg_db=mydb_name \
+  --table_name=my_table_name \
+  --chunk_size=100000 \
+  --year=2021 \
+  --month=1
+```
+
+Use `uv run python ingest_data.py --help` to see all available options.
+
 ---
 
 ## Project layout 📁
@@ -55,4 +73,3 @@ Please open issues for bugs or feature requests and provide reproduction steps a
 
 ---
 
-If you'd like, I can create or update `virtual-environment/requirements.txt`, add example unit tests, or commit these README changes for you. 🔁
