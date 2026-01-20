@@ -31,15 +31,22 @@ python pipeline.py 1
 uv run python pipeline.py 10
 ```
 
-4. Run the data ingestion script (requires PostgreSQL running):
+4. Start PostgreSQL and pgAdmin with Docker Compose:
+
+```bash
+cd virtual-environment
+docker-compose up -d
+```
+
+5. Run the data ingestion script (requires PostgreSQL running):
 
 ```bash
 cd virtual-environment
 uv run python ingest_data.py \
   --pg_user=my_db_usr \
   --pg_password=my_db_pass \
-  --pg_host=localhost \
-  --pg_port=my_port_number \
+  --pg_host=pgdatabase \
+  --pg_port=5432 \
   --pg_db=mydb_name \
   --table_name=my_table_name \
   --chunk_size=100000 \
@@ -51,10 +58,28 @@ Use `uv run python ingest_data.py --help` to see all available options.
 
 ---
 
+## Docker Compose 🐳
+
+The `docker-compose.yml` file sets up two services:
+
+- **PostgreSQL** (`pgdatabase`): Database service running on port `5432`
+- **pgAdmin**: Web UI for managing PostgreSQL, accessible at `http://localhost:8085`
+
+### pgAdmin Connection Details
+
+To connect pgAdmin to PostgreSQL:
+- **Hostname:** `pgdatabase` (or `localhost` if connecting from host machine)
+- **Port:** `5432`
+- **Username:** Set via `POSTGRES_USER` environment variable
+- **Password:** Set via `POSTGRES_PASSWORD` environment variable
+
+---
+
 ## Project layout 📁
 
 - `virtual-environment/` — example pipeline, venv instructions, and README
 - `docker/` — helpful Docker files and examples
+- `docker-compose.yml` — Docker Compose configuration for PostgreSQL and pgAdmin
 - `README.md` — this file
 
 ---
@@ -64,6 +89,7 @@ Use `uv run python ingest_data.py --help` to see all available options.
 - Add dependencies to `virtual-environment/requirements.txt` and run `pip install -r ...` inside the venv.
 - The repo `.gitignore` has been updated to ignore `.venv/`, packaging artifacts, and `uv.lock`.
 - To save dependencies: `pip freeze > virtual-environment/requirements.txt`.
+- Set environment variables in a `.env` file for Docker Compose (e.g., `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `PGADMIN_DEFAULT_EMAIL`, `PGADMIN_DEFAULT_PASSWORD`).
 
 ---
 
@@ -72,4 +98,3 @@ Use `uv run python ingest_data.py --help` to see all available options.
 Please open issues for bugs or feature requests and provide reproduction steps and expected behavior.
 
 ---
-
