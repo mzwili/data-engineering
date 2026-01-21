@@ -79,6 +79,8 @@ To connect pgAdmin to PostgreSQL:
 
 - `virtual-environment/` — example pipeline, venv instructions, and README
 - `docker/` — helpful Docker files and examples
+- `terraformproject1/` — Terraform configuration for infrastructure as code
+- `postgres_docker/` — PostgreSQL database data directory
 - `docker-compose.yml` — Docker Compose configuration for PostgreSQL and pgAdmin
 - `README.md` — this file
 

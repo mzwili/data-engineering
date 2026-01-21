@@ -46,6 +46,23 @@ logs/
 .cache/
 uv.lock
 
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+.terraformrc
+terraform.rc
+
 # Packaging & tooling
 .python-version
 .pytest_cache/
@@ -60,6 +77,9 @@ pip-wheel-metadata/
 .mypy_cache/
 .ropeproject/
 .pyre/
+
+# Database
+postgres_docker/ny_taxi_postgres_data/
 
 # Local editor/workspace
 .vscode/settings.json
